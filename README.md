@@ -18,7 +18,7 @@
 
 ### 1.2 視覺化：損失曲面上的下降路徑
 
-![Conceptual image of a loss surface showing the path of gradient descent from a high point down to a minimum.](https://i.imgur.com/G5iT1C5.png)
+<img width="429" height="408" alt="94Uog" src="https://github.com/user-attachments/assets/952c2534-36fb-4b70-97e9-9530b389e343" />
 
 ---
 
@@ -105,6 +105,3 @@ SVM 訓練完成！
 | **Python 實現** | 框架自動微分 | 手動實現 `if/else` 邏輯 |
 
 兩種方法皆成功通過 $\vec{w}^{*} = \vec{w} - \eta \nabla L(\vec{w})$ 的迭代，解決了各自模型複雜的最佳化問題。
-
-```
-```

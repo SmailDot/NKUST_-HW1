@@ -1,30 +1,8 @@
-非常樂意協助您完成這項任務。作為 AI 助手，我無法直接存取您的電腦或 GitHub 帳號來執行上傳操作，但我將為您提供完整的 **Terminal 指令**和一份專業的 **`README.md` 內容**。
-
-請您按照以下步驟在您的電腦上執行操作：
-
-### 步驟一：Git 指令操作 (將檔案上傳至 GitHub)
-
-請在您的專案目錄 `E:\SVM_MLP_traing` 下打開您的 **Git Bash** 或 **PowerShell** 終端機，依序執行以下指令：
-
-| 指令 | 說明 |
-| :--- | :--- |
-| **`cd E:\SVM_MLP_traing`** | 進入您的專案資料夾。 |
-| **`git init`** | (如果資料夾是新的) 初始化為 Git 儲存庫。 |
-| **`git remote add origin https://github.com/SmailDot/NKUST_-HW1.git`** | 告訴 Git 遠端儲存庫的地址。 |
-| **`(請在此處創建 README.md 檔案)`** | 將步驟二提供的內容貼入名為 `README.md` 的檔案中。 |
-| **`git add .`** | 將目前目錄下所有新建立/修改的檔案 (`mlp.py`, `svm.py`, `README.md`) 加入暫存區。 |
-| **`git commit -m "feat: Finish HW1 - MLP and SVM Training Derivations"`** | 提交變更，並附上本次提交的說明。 |
-| **`git push -u origin master`** | 將本地的變更推送到遠端儲存庫的 `master` 分支（如果您的主分支是 `main`，請將 `master` 改為 `main`）。 |
-| **(輸入您的 GitHub 帳號/密碼或 Token)** | 完成上傳。 |
-
-### 步驟二：`README.md` 檔案內容 (Markdown 格式)
-
-請建立一個名為 `README.md` 的純文字檔案，並將以下 Markdown 內容完整複製貼上。這份文件詳細介紹了您的作業內容、數學推導和實作結果。
 
 ````markdown
 # NKUST_-HW1: MLP 與 SVM 訓練過程的比較與實作
 
-本專案旨在對比 **多層感知器 (MLP)** 與 **支持向量機 (SVM)** 的訓練過程，並深入探討機器學習中的**梯度下降 (Gradient Descent)** 最佳化原理。
+本專案對比 **多層感知器 (MLP)** 與 **支持向量機 (SVM)** 的訓練過程，並深入探討機器學習中的**梯度下降 (Gradient Descent)** 最佳化原理。
 
 ---
 

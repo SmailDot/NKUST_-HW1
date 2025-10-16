@@ -10,7 +10,7 @@
 
 我們可以將**損失函數 $L(\vec{w})$** 想像成一座凹凸不平的「山谷」，而模型的參數 $\vec{w}$ 則是我們在山谷中的**位置**。訓練的目標就是找到山谷的**最低點** (即最小化 $L(\vec{w})$)。
 
-*   **參數更新公式：** 每次更新就是我們邁出的一小步。
+*   **參數更新公式：** 
     $$\vec{w}^{*} = \vec{w} + \Delta \vec{w}$$
 *   **調整量 $\Delta \vec{w}$：** 這一小步的方向和大小由**梯度 (Gradient)** 決定。梯度 $\nabla L(\vec{w})$ 指向山坡最陡峭的**上升**方向，因此我們必須朝著它的**反方向**走。
     $$\Delta \vec{w} = - \eta \nabla L(\vec{w})$$
@@ -36,8 +36,8 @@ MLP 是一個複合函數。要找到深層參數的梯度，必須將輸出層�
 
 | 步驟 | 程式碼實現 | 說明 |
 | :--- | :--- | :--- |
-| **計算 $\Delta \vec{w}$** | `loss.backward()` | 執行反向傳播，自動計算 $\nabla L$ (即 $-\Delta \vec{w}/\eta$)。 |
-| **應用 $\vec{w}^{*} = \vec{w} + \Delta \vec{w}$** | `optimizer.step()` | 讀取梯度，並根據優化器公式（例如 Adam）更新 $\vec{w}$ 的值。**此行即是公式的實現。** |
+| **計算 $\Delta \vec{w}$** | `loss.backward()` | **反向傳播**：框架自動計算梯度 $\nabla L$。 |
+| **應用 $\vec{w}^{*} = \vec{w} + \Delta \vec{w}$** | `optimizer.step()` | **最佳化器步驟**：讀取 $\nabla L$，並更新 $\vec{w}$ 的值。**此行即是公式的實現。** |
 
 ### Python 執行結果 (單一 Epoch 驗證機制)
 
@@ -54,18 +54,20 @@ Loss: 0.7474  # 證明前向/反向傳播迴圈正確
 
 ## 3\. SVM 訓練過程：軟間隔與次梯度下降 (svm.py)
 
-SVM 的核心是**最大化間隔 (Maximum Margin)**，這體現在目標函數的第一項上。
+本實作採用了軟間隔 SVM 的原始問題形式，是**凸優化**問題。
 
 ### 數學推導 (核心：Hinge Loss 次梯度)
 
-  * **目標函數 $J(\vec{w})$：**
-    $$J(\vec{w}, b) = \underbrace{\frac{1}{2} ||\vec{w}||^2}_{\text{最大化間隔}} + \underbrace{C \sum_{i=1}^{N} \max(0, 1 - y_i (\vec{w}^T \vec{x}_i + b))}_{\text{鉸鏈損失}}$$
-  * **梯度 $\nabla J(\vec{w})$ (次梯度)：** 由於 Hinge Loss 不完全可微，使用**次梯度**分段計算 $\nabla J$。
-    $$\nabla J(\vec{w}) = \begin{cases} \vec{w} & \text{if } y_i (\vec{w}^T \vec{x}_i + b) \geq 1 \\ \vec{w} - C y_i \vec{x}_i & \text{if } y_i (\vec{w}^T \vec{x}_i + b) < 1 \end{cases}$$
+  * **目標函數 $J(\vec{w}, b)$：** 最小化 $J$。
+      * **$J$ 的第一項 (最大化間隔)：** $\frac{1}{2} \Vert \vec{w} \Vert^2$
+      * **$J$ 的第二項 (鉸鏈損失)：** $C \sum \max(0, 1 - y_i (\vec{w}^T \vec{x}_i + b))$
+  * **梯度 $\nabla J(\vec{w})$ (次梯度)：** 由於 Hinge Loss 在邊界處不可微，使用**次梯度**計算。程式碼中實現了**分段函數**的邏輯：
+      * **若已分類正確 (損失為 0)：** 梯度 $\nabla J = \vec{w}$ (僅對正規化項求導)。
+      * **若誤判或在間隔內 (損失 \> 0)：** 梯度 $\nabla J = \vec{w} - C y_i \vec{x}_i$。
 
 ### Python 實作 $\vec{w}^{*} = \vec{w} + \Delta \vec{w}$
 
-本實作手動編寫了 SGD 迴圈，清晰展示了 $\vec{w}$ 的更新。
+手動編寫了 SGD 迴圈，清晰展示了 $\vec{w}$ 的更新。
 
 ```python
 # --- 程式碼片段：實現次梯度計算與更新 ---

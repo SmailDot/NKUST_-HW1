@@ -1,109 +1,49 @@
-# NKUST_-HW1: MLP 與 SVM 訓練過程的對比與實作
+# 🚀 機器學習過程可視化：持續改進 (MLP) vs. 一次優化 (SVM)
 
-對比 **多層感知器 (MLP)** 與 **支持向量機 (SVM)** 的訓練過程，深入探討機器學習中的**梯度下降 (Gradient Descent)** 最佳化原理。
+本專案提供一個互動式的 Streamlit 應用程式，旨在透過實時可視化，清晰地展示現代深度學習模型（MLP）的**「持續改進」**機制，並與傳統機器學習模型（SVM）的**「一次性優化」**機制進行對比。
 
----
+## ✨ 專案亮點
 
-## 1. 核心原理：梯度下降與山谷漫步 (Gradient Descent)
+*   **📈 MLP 實時訓練可視化：** 實時繪製 Loss（損失）和 Accuracy（準確度）曲線，動態展示 AI 如何通過**反向傳播**和**梯度下降**持續學習和改進。
+*   **⚙️ 互動式超參數調整：** 允許用戶實時調整學習率、訓練輪數等超參數，並觀察它們如何影響模型的改進過程和收斂結果。
+*   **🔬 SVM 訓練對比：** 展示 SVM 的一次性訓練時間和最終準確度，與 MLP 的迭代學習形成對比。
+*   **🖼️ SVM 決策邊界可視化：** 在低維度數據上繪製 SVM 的**決策邊界**、**決策邊緣 (Margin)** 和**支持向量**，直觀解釋 SVM 的幾何優化原理。
 
-### 1.1 核心概念：山谷漫步的哲學 (由淺入深)
+## 🛠️ 如何運行專案
 
-我們可以將**損失函數 $L(\vec{w})$** 想像成一座凹凸不平的「山谷」，而模型的參數 $\vec{w}$ 則是我們在山谷中的**位置**。訓練的目標就是找到山谷的**最低點** (即最小化 $L(\vec{w})$)。
-
-*   **參數更新公式：** 
-    $$\vec{w}^{*} = \vec{w} + \Delta \vec{w}$$
-*   **調整量 $\Delta \vec{w}$：** 這一小步的方向和大小由**梯度 (Gradient)** 決定。梯度 $\nabla L(\vec{w})$ 指向山坡最陡峭的**上升**方向，因此我們必須朝著它的**反方向**走。
-    $$\Delta \vec{w} = - \eta \nabla L(\vec{w})$$
-    ($\eta$ 是學習率，控制步長。)
-
-### 1.2 視覺化：損失曲面上的下降路徑
-
-<img width="429" height="408" alt="94Uog" src="https://github.com/user-attachments/assets/952c2534-36fb-4b70-97e9-9530b389e343" />
-
----
-
-## 2. MLP 訓練過程：非凸優化與反向傳播 (mlp.py)
-
-MLP 是一個複合函數。要找到深層參數的梯度，必須將輸出層的誤差逐層向後分配。
-
-### 數學推導 (核心：鏈式法則)
-
-*   **目標函數：** 最小化交叉熵損失 $L$。
-*   **核心機制：** **反向傳播 (Backpropagation)**。它是一種高效應用微積分**鏈式法則**的演算法，將 $\nabla L$ 倒推回每一層權重 $\vec{W}^{[l]}$。
-*   **更新實現：** 在 PyTorch 等框架中，此複雜推導被自動化。
-
-### Python 實作 $\vec{w}^{*} = \vec{w} + \Delta \vec{w}$
-
-| 步驟 | 程式碼實現 | 說明 |
-| :--- | :--- | :--- |
-| **計算 $\Delta \vec{w}$** | `loss.backward()` | **反向傳播**：框架自動計算梯度 $\nabla L$。 |
-| **應用 $\vec{w}^{*} = \vec{w} + \Delta \vec{w}$** | `optimizer.step()` | **最佳化器步驟**：讀取 $\nabla L$，並更新 $\vec{w}$ 的值。**此行即是公式的實現。** |
-
-### Python 執行結果 (單一 Epoch 驗證機制)
+### 1. 克隆專案
 
 ```bash
-PS E:\SVM_MLP_traing> python .\mlp.py
-開始訓練一個 Epoch...
---------------------
-Loss: 0.7474  # 證明前向/反向傳播迴圈正確
---------------------
-訓練完成。
-````
-
------
-
-## 3\. SVM 訓練過程：軟間隔與次梯度下降 (svm.py)
-
-本實作採用了軟間隔 SVM 的原始問題形式，是**凸優化**問題。
-
-### 數學推導 (核心：Hinge Loss 次梯度)
-
-  * **目標函數 $J(\vec{w}, b)$：** 最小化 $J$。
-      * **$J$ 的第一項 (最大化間隔)：** $\frac{1}{2} \Vert \vec{w} \Vert^2$
-      * **$J$ 的第二項 (鉸鏈損失)：** $C \sum \max(0, 1 - y_i (\vec{w}^T \vec{x}_i + b))$
-  * **梯度 $\nabla J(\vec{w})$ (次梯度)：** 由於 Hinge Loss 在邊界處不可微，使用**次梯度**計算。程式碼中實現了**分段函數**的邏輯：
-      * **若已分類正確 (損失為 0)：** 梯度 $\nabla J = \vec{w}$ (僅對正規化項求導)。
-      * **若誤判或在間隔內 (損失 \> 0)：** 梯度 $\nabla J = \vec{w} - C y_i \vec{x}_i$。
-
-### Python 實作 $\vec{w}^{*} = \vec{w} + \Delta \vec{w}$
-
-手動編寫了 SGD 迴圈，清晰展示了 $\vec{w}$ 的更新。
-
-```python
-# --- 程式碼片段：實現次梯度計算與更新 ---
-
-# 1. 梯度計算 (if/else 實現分段次梯度)
-if decision >= 1:
-    dw = w       
-    # ...
-else:
-    # 僅在誤判或邊界內時，才加入懲罰項 - C * y_i * x_i
-    dw = w - C * yi * xi 
-    # ...
-
-# 2. 應用更新： w* = w + Delta_w
-w -= learning_rate * dw # w_new = w_old - eta * dw
-# w 和 b 變數此時被更新為 w* 和 b*
+git clone https://github.com/SmailDot/NKUST_-HW1_MLP-SVM-Train.git
+cd NKUST_-HW1_MLP-SVM-Train
 ```
 
-### Python 執行結果 (最終權重 W, b 輸出)
+### 2.安裝依賴
+使用 requirements.txt 來管理所有必要的 Python 庫。
+```bash
+pip install -r requirements.txt
+```
+### 3. 啟動 Streamlit 應用程式
 
 ```bash
-PS E:\SVM_MLP_traing> python .\svm.py
-SVM 訓練完成！
-最終權重 W: [-1.4312307   1.82241949]  
-最終偏置 b: -1.7000000000000004
+streamlit run app.py
 ```
+程式將自動開啟 (http://localhost:8501)
 
------
+### 4.📂 文件結構說明
 
-## 4\. 總結與對比 (Conclusion)
+| 文件名 | 說明 |
+| --- | --- |
+| app.py | 核心應用程式：整合了 MLP 訓練、SVM 訓練和所有 Streamlit UI 邏輯。 |
+| requirements.txt | Python 依賴包列表 (streamlit, torch, scikit-learn 等)。 |
+| README.md | 專案概覽與運行指南。 |
+| MLP推導過程.md | 詳細解釋 MLP 的梯度下降與反向傳播原理。 |
+| SVM推導過程.md | 詳細解釋 SVM 的邊緣最大化與二次規劃原理。 |
 
-| 特性 | MLP (多層感知器) | SVM (支持向量機) |
-| :--- | :--- | :--- |
-| **損失函數** | 交叉熵 (Cross-Entropy) | 鉸鏈損失 (Hinge Loss) |
-| **梯度方法** | 反向傳播 (Backpropagation) | 次梯度下降 (Subgradient Descent) |
-| **問題性質** | 高度非凸優化 (容易局部最優) | 軟間隔凸優化 (GD 可找到全局最優) |
-| **Python 實現** | 框架自動微分 | 手動實現 `if/else` 邏輯 |
+### 5.💡 學習目標
+透過這個應用程式和文件，您可以清晰地掌握兩種模型的本質差異：
 
-兩種方法皆成功通過 $\vec{w}^{*} = \vec{w} - \eta \nabla L(\vec{w})$ 的迭代，解決了各自模型複雜的最佳化問題。
+**深度學習 (MLP)**： 基於微積分和迭代的持續優化。
+
+**傳統機器學習 (SVM)**： 基於幾何學和一次性數學求解的優化。
+
